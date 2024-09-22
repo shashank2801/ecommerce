@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,33 +20,37 @@ import com.shashank.ecom.ecommerece.model.Category;
 import com.shashank.ecom.ecommerece.service.CategoryService;
 
 @RestController
+@RequestMapping("/api")
 public class CategoryController {
 	
 	@Autowired
 	private CategoryService categoryService;
 	
-	@GetMapping("/api/public/category/list")
+	@GetMapping("/public/category/list")
 	public List<Category> getAll(){
 		return categoryService.findAll();
 	}
 	
-	@PostMapping("/api/admin/category/list")
+	@PostMapping("/admin/category/list")
 	public String addCategory(@RequestBody Category category) {
 		return categoryService.add(category);
 	}
 	
-	@PutMapping("/api/admin/category/{id}")
+	@PutMapping("/admin/category/{id}")
 	public ResponseEntity<String> updateCategory(@PathVariable Integer id, @RequestBody Category category) {
 		try {
-			String status = categoryService.updateCategory(id,category);
-			return new ResponseEntity<>(status,HttpStatus.OK);
+			Category status = categoryService.updateCategory(id,category);
+			if(status != null)
+				return new ResponseEntity<>("Updated successfully",HttpStatus.OK);
+			else
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Resource not found!");
 		}
 		catch (ResponseStatusException e) {
 			return new ResponseEntity<>(e.getReason(),e.getStatusCode());
 		}
 	}
 	
-	@DeleteMapping("/api/admin/category/{id}")
+	@DeleteMapping("/admin/category/{id}")
 	public ResponseEntity<String> deleteCategory(@PathVariable Integer id){
 		try {
 			String status = categoryService.deleteCategory(id);

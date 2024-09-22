@@ -9,7 +9,7 @@ public interface CategoryService {
 	
 	public String add(Category category);
 	
-	public String updateCategory(Integer id, Category category);
+	public Category updateCategory(Integer id, Category category);
 	
 	public String deleteCategory(Integer id);
 }

@@ -2,7 +2,9 @@ package com.shashank.ecom.ecommerece.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -11,44 +13,57 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.shashank.ecom.ecommerece.model.Category;
+import com.shashank.ecom.ecommerece.repositories.CategoryRepository;
 
 @Service
 public class CategoryServiceImpl implements CategoryService{
 
-	private List<Category> categories = new ArrayList<Category>();
+//	private List<Category> categories = new ArrayList<Category>();
+	
+	@Autowired
+	private CategoryRepository cRepository;
 	
 	public List<Category> findAll() {
 		// TODO Auto-generated method stub
-		return categories;
+		return cRepository.findAll();
 	}
 
 	@Override
 	public String add(Category category) {
 		// TODO Auto-generated method stub
-		categories.add(category);
+		cRepository.save(category);
 		return "Added Successfully";
 	}
 
 	@Override
-	public String updateCategory(Integer id, Category category) {
+	public Category updateCategory(Integer id, Category category) {
 		// TODO Auto-generated method stub
-		Category cat = categories.stream()
+		List<Category> categories = cRepository.findAll();
+		Optional<Category> optionalCategory = categories.stream()
 				.filter(p -> p.getCategoryId().equals(id))
-				.findFirst()
-				.orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"Resource not found!"));
-		cat.setCategoryDescription(category.getCategoryDescription());
-		return "Updated Successfully";
+				.findFirst();
+		if(optionalCategory.isPresent()) {
+			Category existingCategory = optionalCategory.get();
+			existingCategory.setCategoryDescription(category.getCategoryDescription());
+			Category savedCategory = cRepository.save(existingCategory);
+			return savedCategory;
+		}
+		else {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Resource not found!");
+		}
 	}
 
 	@Override
 	public String deleteCategory(Integer id) {
 		// TODO Auto-generated method stub
-		Category cat = categories.stream()
+		List<Category> categories = cRepository.findAll();
+		Category optionalCategory = categories.stream()
 				.filter(p -> p.getCategoryId().equals(id))
 				.findFirst()
 				.orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"Resource not found!"));
-		categories.remove(cat);
-		return "Removed Successfully";
+			
+		cRepository.delete(optionalCategory);
+			return "Removed Successfully";
 	}
 
 }
