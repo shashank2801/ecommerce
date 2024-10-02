@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.shashank.ecom.ecommerece.exceptions.ResourceNotFoundException;
 import com.shashank.ecom.ecommerece.model.Category;
 import com.shashank.ecom.ecommerece.repositories.CategoryRepository;
 
@@ -36,7 +37,7 @@ public class CategoryServiceImpl implements CategoryService{
 	}
 
 	@Override
-	public Category updateCategory(Integer id, Category category) {
+	public Category updateCategory(Long id, Category category) {
 		// TODO Auto-generated method stub
 		List<Category> categories = cRepository.findAll();
 		Optional<Category> optionalCategory = categories.stream()
@@ -49,21 +50,22 @@ public class CategoryServiceImpl implements CategoryService{
 			return savedCategory;
 		}
 		else {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Resource not found!");
+			throw new ResourceNotFoundException("Category","Category Id",id);
 		}
 	}
 
 	@Override
-	public String deleteCategory(Integer id) {
+	public String deleteCategory(Long id) {
 		// TODO Auto-generated method stub
 		List<Category> categories = cRepository.findAll();
 		Category optionalCategory = categories.stream()
 				.filter(p -> p.getCategoryId().equals(id))
 				.findFirst()
-				.orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"Resource not found!"));
+				.orElseThrow(()-> new ResourceNotFoundException("Category","Category Id",id));
 			
 		cRepository.delete(optionalCategory);
 			return "Removed Successfully";
 	}
+
 
 }
